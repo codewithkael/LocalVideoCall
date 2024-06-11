@@ -14,11 +14,11 @@ class SocketServer @Inject constructor(
 ) {
 
     private var socketserver: WebSocketServer? = null
-    private var memberToCall: SocketMember? = null
+    private var memberToCall: WebSocket? = null
 
     private var socketServerPort = 3013
 
-    private val TAG = "SocketServer"
+    private val TAG = "SocketRepository"
     fun init(
         listener: SocketServerListener,
     ) {
@@ -26,7 +26,9 @@ class SocketServer @Inject constructor(
         if (socketserver == null) {
             socketserver = object : WebSocketServer(InetSocketAddress(socketServerPort)) {
                 override fun onOpen(conn: WebSocket?, handshake: ClientHandshake?) {
-
+                    if (memberToCall == null){
+                        memberToCall = conn
+                    }
                 }
 
                 override fun onClose(
@@ -35,7 +37,9 @@ class SocketServer @Inject constructor(
                     reason: String?,
                     remote: Boolean
                 ) {
-
+                    if (conn == memberToCall){
+                        memberToCall = null
+                    }
                 }
 
                 override fun onMessage(conn: WebSocket?, message: String?) {
@@ -67,10 +71,11 @@ class SocketServer @Inject constructor(
 
 
     fun sendDataToClient(dataModel: MessageModel) {
+        Log.d(TAG, "sendDataTo111Client: $dataModel")
         runCatching {
             memberToCall?.let {
                 val jsonedModel = gson.toJson(dataModel)
-                it.connection.send(
+                memberToCall?.send(
                     jsonedModel
                 )
             }

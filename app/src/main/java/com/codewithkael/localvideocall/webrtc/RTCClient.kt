@@ -25,10 +25,29 @@ class RTCClient(
     private val sendMessageToSocket: (model: MessageModel) -> Unit
 ) {
 
-    private val iceServer = listOf(
-        PeerConnection.IceServer.builder("turn:185.246.66.75:3478")
-            .setUsername("user").setPassword("password").createIceServer()
-    )
+    //    private val iceServer = listOf(
+//        PeerConnection.IceServer.builder("stun:stun.relay.metered.ca:80").createIceServer(),
+//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:80")
+//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
+//            .setPassword("KuuHVTmXU80Q1WMO")
+//            .createIceServer(),
+//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:80?transport=tcp")
+//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
+//            .setPassword("KuuHVTmXU80Q1WMO")
+//            .createIceServer(),
+//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:443")
+//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
+//            .setPassword("KuuHVTmXU80Q1WMO")
+//            .createIceServer(),
+//        PeerConnection.IceServer.builder("turns:global.relay.metered.ca:443?transport=tcp")
+//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
+//            .setPassword("KuuHVTmXU80Q1WMO")
+//            .createIceServer()
+//    )
+    private val iceServer = listOf<PeerConnection.IceServer>()
+    private val mediaConstraints = MediaConstraints().apply {
+        mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
+    }
 
     init {
         initPeerConnectionFactory(application)
@@ -121,8 +140,6 @@ class RTCClient(
     }
 
     fun call() {
-        val mediaConstraints = MediaConstraints()
-        mediaConstraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
         peerConnection?.createOffer(object : MySdpObserver() {
             override fun onCreateSuccess(desc: SessionDescription?) {
                 peerConnection?.setLocalDescription(object : MySdpObserver() {
@@ -137,9 +154,6 @@ class RTCClient(
     }
 
     fun answer() {
-        val constraints = MediaConstraints()
-        constraints.mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
-
         peerConnection?.createAnswer(object : MySdpObserver() {
             override fun onCreateSuccess(desc: SessionDescription?) {
                 peerConnection?.setLocalDescription(object : MySdpObserver() {
@@ -153,7 +167,7 @@ class RTCClient(
 
                 }, desc)
             }
-        }, constraints)
+        }, mediaConstraints)
     }
 
     fun onRemoteSessionReceived(session: SessionDescription) {
@@ -162,6 +176,15 @@ class RTCClient(
 
     fun addIceCandidate(p0: IceCandidate?) {
         peerConnection?.addIceCandidate(p0)
+    }
+
+    fun onDestroy() {
+        runCatching {
+            localVideoTrack?.dispose()
+            localAudioSource?.dispose()
+            videoCapturer?.dispose()
+            peerConnection?.close()
+        }
     }
 
     fun switchCamera() {

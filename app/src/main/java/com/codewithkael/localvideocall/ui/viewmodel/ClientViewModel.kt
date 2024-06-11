@@ -2,6 +2,7 @@ package com.codewithkael.localvideocall.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.codewithkael.localvideocall.remote.socket.client.SocketClient
 import com.codewithkael.localvideocall.remote.socket.server.SocketClientListener
@@ -12,9 +13,9 @@ import com.codewithkael.localvideocall.webrtc.PeerConnectionObserver
 import com.codewithkael.localvideocall.webrtc.RTCClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.webrtc.IceCandidate
 import org.webrtc.MediaStream
+import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
@@ -26,11 +27,7 @@ class ClientViewModel @Inject constructor(
     private val gson: Gson
 ) : ViewModel(), SocketClientListener {
 
-    //socket variables
-    private var ipAddress:String?=null
-
-    //states
-    val hostAddressState: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val TAG = "SocketRepository"
 
     //webrtc variables
     @SuppressLint("StaticFieldLeak")
@@ -45,24 +42,37 @@ class ClientViewModel @Inject constructor(
 
             override fun onAddStream(p0: MediaStream?) {
                 super.onAddStream(p0)
-                remoteView?.let { remote->
+                remoteView?.let { remote ->
                     p0?.let { mediaStream ->
                         mediaStream.videoTracks[0]?.addSink(remote)
                     }
                 }
+
             }
+
+            override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+                super.onConnectionChange(newState)
+                Log.d(TAG, "onConnectionChange: $newState")
+            }
+
+            override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
+                super.onIceConnectionChange(p0)
+                Log.d(TAG, "onConnectionChange ice state: $p0")
+
+            }
+
         }) {
             socketClient.sendDataToHost(it)
         }
     }
 
-    fun init(serverAddress:String,onError:()->Unit) {
-        startSocketClient(serverAddress,onError)
+    fun init(serverAddress: String, onError: () -> Unit) {
+        startSocketClient(serverAddress, onError)
     }
 
 
     private fun startSocketClient(serverAddress: String, onError: () -> Unit) {
-        socketClient.init(serverAddress,this@ClientViewModel){
+        socketClient.init(serverAddress, this@ClientViewModel) {
             onError.invoke()
         }
     }
@@ -94,6 +104,8 @@ class ClientViewModel @Inject constructor(
         super.onCleared()
         remoteView?.release()
         remoteView = null
+        rtcClient.onDestroy()
+        socketClient.onDestroy()
     }
 
     override fun onSocketClientOpened() {

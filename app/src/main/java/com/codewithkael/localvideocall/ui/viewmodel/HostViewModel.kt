@@ -37,7 +37,7 @@ class HostViewModel @Inject constructor(
     //states
     val hostAddressState: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    private val TAG = "SocketServer"
+    private val TAG = "SocketRepository"
     //webrtc variables
     @SuppressLint("StaticFieldLeak")
     private var remoteView: SurfaceViewRenderer? = null
@@ -62,6 +62,11 @@ class HostViewModel @Inject constructor(
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
                 super.onConnectionChange(newState)
                 Log.d(TAG, "onConnectionChange: $newState")
+            }
+            override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
+                super.onIceConnectionChange(p0)
+                Log.d(TAG, "onConnectionChange ice state: $p0")
+
             }
         }) {
             Log.d(TAG, "send message to socket: $it")
@@ -125,6 +130,8 @@ class HostViewModel @Inject constructor(
         super.onCleared()
         remoteView?.release()
         remoteView = null
+        rtcClient.onDestroy()
+        socketServer.onDestroy()
     }
 
 }

@@ -10,7 +10,7 @@ import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class SocketClient @Inject constructor(
     private val gson:Gson,
 ) {
@@ -20,19 +20,14 @@ class SocketClient @Inject constructor(
     fun init(socketAddress:String, listener: SocketClientListener,onError:()->Unit) {
         webSocket = object : WebSocketClient(URI("ws://$socketAddress")) {
             override fun onOpen(handshakedata: ServerHandshake?) {
+                Log.d(TAG, "onOpen: ")
                 listener.onSocketClientOpened()
             }
 
             override fun onMessage(message: String?) {
                 Log.d(TAG, "onMessage: $message")
-                try {
-                    listener.onSocketClientMessage(gson.fromJson(message, MessageModel::class.java))
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-
             }
+
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
                 Log.d(TAG, "onClose: $reason")
@@ -49,10 +44,17 @@ class SocketClient @Inject constructor(
     }
 
     fun sendDataToHost(message: MessageModel) {
+        Log.d(TAG, "sendDataTo111Host: $message")
         try {
             webSocket?.send(Gson().toJson(message))
         } catch (e: Exception) {
             Log.d(TAG, "sendMessageToSocket: $e")
+        }
+    }
+
+    fun onDestroy() {
+        runCatching {
+            webSocket?.close()
         }
     }
 }
