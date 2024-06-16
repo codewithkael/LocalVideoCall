@@ -36,6 +36,7 @@ class SocketServer @Inject constructor(
                 ) {
                     if (conn == memberToCall) {
                         memberToCall = null
+                        listener.onClientDisconnected()
                     }
                 }
 

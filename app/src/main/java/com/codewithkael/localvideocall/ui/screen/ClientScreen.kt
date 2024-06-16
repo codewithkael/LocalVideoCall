@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,11 @@ import kotlinx.coroutines.launch
 fun ClientScreen(navController: NavController, serverAddress: String?) {
     val clientViewModel: ClientViewModel = hiltViewModel()
     val context = LocalContext.current
+
+    val callConnectedState = clientViewModel.callDisconnected.collectAsState()
+    if (callConnectedState.value){
+        navController.navigate(MAIN_SCREEN)
+    }
 
     LaunchedEffect(key1 = Unit) {
         clientViewModel.init(serverAddress!!) {

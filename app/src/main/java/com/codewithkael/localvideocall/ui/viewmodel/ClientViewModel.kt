@@ -3,6 +3,7 @@ package com.codewithkael.localvideocall.ui.viewmodel
 import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.codewithkael.localvideocall.remote.socket.client.SocketClient
 import com.codewithkael.localvideocall.remote.socket.server.SocketClientListener
 import com.codewithkael.localvideocall.utils.MessageModel
@@ -12,8 +13,11 @@ import com.codewithkael.localvideocall.webrtc.PeerConnectionObserver
 import com.codewithkael.localvideocall.webrtc.RTCClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import org.webrtc.IceCandidate
 import org.webrtc.MediaStream
+import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
@@ -24,6 +28,8 @@ class ClientViewModel @Inject constructor(
     private val socketClient: SocketClient,
     private val gson: Gson
 ) : ViewModel(), SocketClientListener {
+
+    val callDisconnected: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
 
     //webrtc variables
@@ -45,6 +51,16 @@ class ClientViewModel @Inject constructor(
                     }
                 }
 
+            }
+
+            override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
+                super.onConnectionChange(newState)
+                if (newState == PeerConnection.PeerConnectionState.DISCONNECTED ||
+                    newState == PeerConnection.PeerConnectionState.CLOSED ){
+                    viewModelScope.launch {
+                        callDisconnected.emit(true)
+                    }
+                }
             }
         }) {
             socketClient.sendDataToHost(it)
@@ -108,5 +124,6 @@ class ClientViewModel @Inject constructor(
             else -> {}
         }
     }
+
 
 }

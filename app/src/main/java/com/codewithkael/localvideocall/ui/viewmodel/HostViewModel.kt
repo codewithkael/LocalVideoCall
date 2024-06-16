@@ -35,6 +35,7 @@ class HostViewModel @Inject constructor(
 
     //states
     val hostAddressState: MutableStateFlow<String?> = MutableStateFlow(null)
+    val callDisconnected: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
 
     //webrtc variables
@@ -59,6 +60,12 @@ class HostViewModel @Inject constructor(
 
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
                 super.onConnectionChange(newState)
+                if (newState == PeerConnection.PeerConnectionState.DISCONNECTED ||
+                    newState == PeerConnection.PeerConnectionState.CLOSED ){
+                    viewModelScope.launch {
+                        callDisconnected.emit(true)
+                    }
+                }
             }
 
         }) {

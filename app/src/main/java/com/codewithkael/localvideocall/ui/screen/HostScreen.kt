@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.codewithkael.localvideocall.ui.components.SurfaceViewRendererComposable
 import com.codewithkael.localvideocall.ui.viewmodel.HostViewModel
+import com.codewithkael.localvideocall.utils.Constants
 
 @Composable
 fun HostScreen(navController: NavController) {
@@ -29,6 +30,11 @@ fun HostScreen(navController: NavController) {
         }
     }
 
+    val callConnectedState = hostViewModel.callDisconnected.collectAsState()
+    if (callConnectedState.value) {
+        navController.navigate(Constants.MAIN_SCREEN)
+    }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
             Text(
@@ -39,9 +45,11 @@ fun HostScreen(navController: NavController) {
             )
 
             //local surface
-            SurfaceViewRendererComposable(modifier = Modifier
-                .fillMaxWidth()
-                .weight(8f)) {
+            SurfaceViewRendererComposable(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(8f)
+            ) {
                 hostViewModel.startLocalStream(it)
             }
 

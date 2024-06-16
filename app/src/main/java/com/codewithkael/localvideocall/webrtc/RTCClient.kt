@@ -100,7 +100,7 @@ class RTCClient(
             surfaceTextureHelper,
             surface.context, localVideoSource.capturerObserver
         )
-        videoCapturer?.startCapture(320, 240, 30)
+        videoCapturer?.startCapture(1080, 720, 30)
         localVideoTrack = peerConnectionFactory.createVideoTrack("local_track", localVideoSource)
         localVideoTrack?.addSink(surface)
         localAudioTrack =
