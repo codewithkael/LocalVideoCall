@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.codewithkael.localvideocall.utils
 
 import android.content.Context

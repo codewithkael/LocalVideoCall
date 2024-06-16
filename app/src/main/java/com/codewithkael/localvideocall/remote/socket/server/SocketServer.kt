@@ -1,6 +1,5 @@
 package com.codewithkael.localvideocall.remote.socket.server
 
-import android.util.Log
 import com.codewithkael.localvideocall.utils.MessageModel
 import com.google.gson.Gson
 import org.java_websocket.WebSocket
@@ -18,15 +17,13 @@ class SocketServer @Inject constructor(
 
     private var socketServerPort = 3013
 
-    private val TAG = "SocketRepository"
     fun init(
         listener: SocketServerListener,
     ) {
-        Log.d(TAG, "init: called")
         if (socketserver == null) {
             socketserver = object : WebSocketServer(InetSocketAddress(socketServerPort)) {
                 override fun onOpen(conn: WebSocket?, handshake: ClientHandshake?) {
-                    if (memberToCall == null){
+                    if (memberToCall == null) {
                         memberToCall = conn
                     }
                 }
@@ -37,13 +34,12 @@ class SocketServer @Inject constructor(
                     reason: String?,
                     remote: Boolean
                 ) {
-                    if (conn == memberToCall){
+                    if (conn == memberToCall) {
                         memberToCall = null
                     }
                 }
 
                 override fun onMessage(conn: WebSocket?, message: String?) {
-                    Log.d(TAG, "onMessage: $message")
                     runCatching {
                         gson.fromJson(message, MessageModel::class.java)
                     }.onSuccess { data ->
@@ -52,7 +48,6 @@ class SocketServer @Inject constructor(
                 }
 
                 override fun onError(conn: WebSocket?, ex: Exception?) {
-                    Log.d(TAG, "onError1: ${ex?.message}")
                     if (ex?.message == "Address already in use") {
                         socketServerPort++
                         onDestroy()
@@ -63,7 +58,6 @@ class SocketServer @Inject constructor(
 
                 override fun onStart() {
                     listener.onStartServer(socketServerPort)
-                    Log.d(TAG, "onStart: ")
                 }
             }.apply { start() }
         }
@@ -71,12 +65,11 @@ class SocketServer @Inject constructor(
 
 
     fun sendDataToClient(dataModel: MessageModel) {
-        Log.d(TAG, "sendDataTo111Client: $dataModel")
         runCatching {
             memberToCall?.let {
-                val jsonedModel = gson.toJson(dataModel)
+                val jsonModel = gson.toJson(dataModel)
                 memberToCall?.send(
-                    jsonedModel
+                    jsonModel
                 )
             }
         }

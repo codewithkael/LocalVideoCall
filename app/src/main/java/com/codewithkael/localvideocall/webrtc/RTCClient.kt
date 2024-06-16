@@ -25,28 +25,10 @@ class RTCClient(
     private val sendMessageToSocket: (model: MessageModel) -> Unit
 ) {
 
-    //    private val iceServer = listOf(
-//        PeerConnection.IceServer.builder("stun:stun.relay.metered.ca:80").createIceServer(),
-//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:80")
-//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-//            .setPassword("KuuHVTmXU80Q1WMO")
-//            .createIceServer(),
-//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:80?transport=tcp")
-//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-//            .setPassword("KuuHVTmXU80Q1WMO")
-//            .createIceServer(),
-//        PeerConnection.IceServer.builder("turn:global.relay.metered.ca:443")
-//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-//            .setPassword("KuuHVTmXU80Q1WMO")
-//            .createIceServer(),
-//        PeerConnection.IceServer.builder("turns:global.relay.metered.ca:443?transport=tcp")
-//            .setUsername("0da9dc3f3ca0b8aef7388ca9")
-//            .setPassword("KuuHVTmXU80Q1WMO")
-//            .createIceServer()
-//    )
     private val iceServer = listOf<PeerConnection.IceServer>()
     private val mediaConstraints = MediaConstraints().apply {
         mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"))
+        mandatory.add(MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"))
     }
 
     init {
@@ -190,6 +172,7 @@ class RTCClient(
     fun switchCamera() {
         videoCapturer?.switchCamera(null)
     }
+
 
     fun toggleAudio(mute: Boolean) {
         localAudioTrack?.setEnabled(mute)

@@ -2,7 +2,6 @@ package com.codewithkael.localvideocall.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.codewithkael.localvideocall.remote.socket.client.SocketClient
 import com.codewithkael.localvideocall.remote.socket.server.SocketClientListener
@@ -15,7 +14,6 @@ import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaStream
-import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
@@ -27,7 +25,6 @@ class ClientViewModel @Inject constructor(
     private val gson: Gson
 ) : ViewModel(), SocketClientListener {
 
-    private val TAG = "SocketRepository"
 
     //webrtc variables
     @SuppressLint("StaticFieldLeak")
@@ -49,18 +46,6 @@ class ClientViewModel @Inject constructor(
                 }
 
             }
-
-            override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
-                super.onConnectionChange(newState)
-                Log.d(TAG, "onConnectionChange: $newState")
-            }
-
-            override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
-                super.onIceConnectionChange(p0)
-                Log.d(TAG, "onConnectionChange ice state: $p0")
-
-            }
-
         }) {
             socketClient.sendDataToHost(it)
         }
@@ -84,9 +69,13 @@ class ClientViewModel @Inject constructor(
 
     private fun handleIceReceived(message: MessageModel) {
         runCatching {
-            gson.fromJson(message.toString(), IceCandidate::class.java)
+            gson.fromJson(message.data.toString(), IceCandidate::class.java)
+
+
         }.onSuccess {
             rtcClient.addIceCandidate(it)
+        }.onFailure {
+            it.printStackTrace()
         }
     }
 

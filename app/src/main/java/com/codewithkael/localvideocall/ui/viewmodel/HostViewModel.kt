@@ -2,11 +2,10 @@ package com.codewithkael.localvideocall.ui.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codewithkael.localvideocall.remote.socket.server.SocketServerListener
 import com.codewithkael.localvideocall.remote.socket.server.SocketServer
+import com.codewithkael.localvideocall.remote.socket.server.SocketServerListener
 import com.codewithkael.localvideocall.utils.MessageModel
 import com.codewithkael.localvideocall.utils.MessageModelType.ICE
 import com.codewithkael.localvideocall.utils.MessageModelType.OFFER
@@ -32,12 +31,12 @@ class HostViewModel @Inject constructor(
 ) : ViewModel(), SocketServerListener {
 
     //socket variables
-    private var ipAddress:String?=null
+    private var ipAddress: String? = null
 
     //states
     val hostAddressState: MutableStateFlow<String?> = MutableStateFlow(null)
 
-    private val TAG = "SocketRepository"
+
     //webrtc variables
     @SuppressLint("StaticFieldLeak")
     private var remoteView: SurfaceViewRenderer? = null
@@ -46,13 +45,12 @@ class HostViewModel @Inject constructor(
             override fun onIceCandidate(p0: IceCandidate?) {
                 super.onIceCandidate(p0)
                 rtcClient.addIceCandidate(p0)
-                Log.d(TAG, "onIceCandidate: send ice to client $p0")
                 socketServer.sendDataToClient(MessageModel(ICE, gson.toJson(p0)))
             }
 
             override fun onAddStream(p0: MediaStream?) {
                 super.onAddStream(p0)
-                remoteView?.let { remote->
+                remoteView?.let { remote ->
                     p0?.let { mediaStream ->
                         mediaStream.videoTracks[0]?.addSink(remote)
                     }
@@ -61,15 +59,9 @@ class HostViewModel @Inject constructor(
 
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
                 super.onConnectionChange(newState)
-                Log.d(TAG, "onConnectionChange: $newState")
             }
-            override fun onIceConnectionChange(p0: PeerConnection.IceConnectionState?) {
-                super.onIceConnectionChange(p0)
-                Log.d(TAG, "onConnectionChange ice state: $p0")
 
-            }
         }) {
-            Log.d(TAG, "send message to socket: $it")
             socketServer.sendDataToClient(it)
         }
     }
@@ -102,6 +94,11 @@ class HostViewModel @Inject constructor(
         }
     }
 
+    override fun onClientDisconnected() {
+        remoteView?.release()
+        prepareRemoteSurfaceView(remoteView!!)
+    }
+
     private fun handleOfferReceived(message: MessageModel) {
         val remoteSDP = SessionDescription(SessionDescription.Type.OFFER, message.data.toString())
         rtcClient.onRemoteSessionReceived(remoteSDP)
@@ -110,9 +107,12 @@ class HostViewModel @Inject constructor(
 
     private fun handleIceReceived(message: MessageModel) {
         runCatching {
-            gson.fromJson(message.toString(), IceCandidate::class.java)
+            gson.fromJson(message.data.toString(), IceCandidate::class.java)
+
         }.onSuccess {
             rtcClient.addIceCandidate(it)
+        }.onFailure {
+            it.printStackTrace()
         }
     }
 

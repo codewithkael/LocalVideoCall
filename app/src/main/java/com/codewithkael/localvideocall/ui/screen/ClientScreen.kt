@@ -19,7 +19,6 @@ import com.codewithkael.localvideocall.utils.Constants.MAIN_SCREEN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
 fun ClientScreen(navController: NavController, serverAddress: String?) {
@@ -27,7 +26,7 @@ fun ClientScreen(navController: NavController, serverAddress: String?) {
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
-        clientViewModel.init(serverAddress!!){
+        clientViewModel.init(serverAddress!!) {
             CoroutineScope(Dispatchers.Main).launch {
                 Toast.makeText(context, "Failed connecting to host", Toast.LENGTH_SHORT).show()
                 navController.navigate(MAIN_SCREEN)
@@ -38,14 +37,16 @@ fun ClientScreen(navController: NavController, serverAddress: String?) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
 
-            //local surfaceview
-            SurfaceViewRendererComposable(modifier = Modifier
-                .fillMaxWidth()
-                .weight(8f)) {
+            //local surface
+            SurfaceViewRendererComposable(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(8f)
+            ) {
                 clientViewModel.startLocalStream(it)
             }
 
-            //remote surfaceview
+            //remote surface
             SurfaceViewRendererComposable(
                 modifier = Modifier
                     .padding(top = 10.dp)
