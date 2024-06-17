@@ -11,6 +11,7 @@ import com.codewithkael.localvideocall.utils.MessageModelType.ICE
 import com.codewithkael.localvideocall.utils.MessageModelType.OFFER
 import com.codewithkael.localvideocall.utils.getWifiIPAddress
 import com.codewithkael.localvideocall.webrtc.PeerConnectionObserver
+import com.codewithkael.localvideocall.webrtc.RTCAudioManager
 import com.codewithkael.localvideocall.webrtc.RTCClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,6 +25,7 @@ import org.webrtc.SurfaceViewRenderer
 import javax.inject.Inject
 
 @HiltViewModel
+@SuppressLint("StaticFieldLeak")
 class HostViewModel @Inject constructor(
     private val application: Application,
     private val socketServer: SocketServer,
@@ -39,8 +41,8 @@ class HostViewModel @Inject constructor(
 
 
     //webrtc variables
-    @SuppressLint("StaticFieldLeak")
     private var remoteView: SurfaceViewRenderer? = null
+    private val rtcAudioManager by lazy { RTCAudioManager.create(application) }
     private val rtcClient: RTCClient by lazy {
         RTCClient(application, object : PeerConnectionObserver() {
             override fun onIceCandidate(p0: IceCandidate?) {
@@ -61,7 +63,8 @@ class HostViewModel @Inject constructor(
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
                 super.onConnectionChange(newState)
                 if (newState == PeerConnection.PeerConnectionState.DISCONNECTED ||
-                    newState == PeerConnection.PeerConnectionState.CLOSED ){
+                    newState == PeerConnection.PeerConnectionState.CLOSED
+                ) {
                     viewModelScope.launch {
                         callDisconnected.emit(true)
                     }
@@ -80,6 +83,7 @@ class HostViewModel @Inject constructor(
             return
         }
         startSocketServer()
+        rtcAudioManager.setDefaultAudioDevice(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
     }
 
 
@@ -139,6 +143,35 @@ class HostViewModel @Inject constructor(
         remoteView = null
         rtcClient.onDestroy()
         socketServer.onDestroy()
+    }
+
+    fun switchCamera() {
+        rtcClient.switchCamera()
+    }
+
+    fun toggleAudio(muted: Boolean) {
+        rtcClient.toggleAudio(muted)
+    }
+
+    fun toggleVideo(muted: Boolean) {
+        rtcClient.toggleVideo(muted)
+    }
+
+    fun endCall() {
+        rtcClient.endCall()
+        viewModelScope.launch {
+            callDisconnected.emit(true)
+        }
+    }
+
+    fun toggleOutputAudio(isSpeakerOn: Boolean) {
+        if (isSpeakerOn) {
+            rtcAudioManager.setDefaultAudioDevice(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
+            rtcAudioManager.selectAudioDevice(RTCAudioManager.AudioDevice.SPEAKER_PHONE)
+        } else {
+            rtcAudioManager.setDefaultAudioDevice(RTCAudioManager.AudioDevice.EARPIECE)
+            rtcAudioManager.selectAudioDevice(RTCAudioManager.AudioDevice.EARPIECE)
+        }
     }
 
 }

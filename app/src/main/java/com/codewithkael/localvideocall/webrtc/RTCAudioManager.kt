@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.codewithkael.localvideocall.webrtc
 
 import android.annotation.SuppressLint
@@ -9,12 +11,9 @@ import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
-import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
-import androidx.annotation.Nullable
 import org.webrtc.ThreadUtils
-import java.util.*
 
 
 class RTCAudioManager(context: Context) {
@@ -43,7 +42,6 @@ class RTCAudioManager(context: Context) {
 
     private val audioManager: AudioManager
 
-    @Nullable
     private var audioManagerEvents: AudioManagerEvents? = null
     private var amState: AudioManagerState
     private var savedAudioMode = AudioManager.MODE_INVALID
@@ -67,7 +65,7 @@ class RTCAudioManager(context: Context) {
     private var userSelectedAudioDevice: AudioDevice? = null
 
     // Contains speakerphone setting: auto, true or false
-    @Nullable
+
     private val useSpeakerphone: String?
 
 
@@ -79,7 +77,6 @@ class RTCAudioManager(context: Context) {
     private val wiredHeadsetReceiver: BroadcastReceiver
 
     // Callback method for changes in audio focus.
-    @Nullable
     private var audioFocusChangeListener: OnAudioFocusChangeListener? = null
 
 
@@ -141,15 +138,20 @@ class RTCAudioManager(context: Context) {
                     AudioManager.AUDIOFOCUS_GAIN -> typeOfChange = "AUDIOFOCUS_GAIN"
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> typeOfChange =
                         "AUDIOFOCUS_GAIN_TRANSIENT"
+
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE -> typeOfChange =
                         "AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE"
+
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK -> typeOfChange =
                         "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK"
+
                     AudioManager.AUDIOFOCUS_LOSS -> typeOfChange = "AUDIOFOCUS_LOSS"
                     AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> typeOfChange =
                         "AUDIOFOCUS_LOSS_TRANSIENT"
+
                     AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> typeOfChange =
                         "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK"
+
                     else -> typeOfChange = "AUDIOFOCUS_INVALID"
                 }
                 Log.d(TAG, "onAudioFocusChange: $typeOfChange")
@@ -244,6 +246,7 @@ class RTCAudioManager(context: Context) {
             } else {
                 defaultAudioDevice = AudioDevice.SPEAKER_PHONE
             }
+
             else -> Log.e(TAG, "Invalid default audio device selection")
         }
         Log.d(TAG, "setDefaultAudioDevice(device=$defaultAudioDevice)")
@@ -263,11 +266,6 @@ class RTCAudioManager(context: Context) {
         updateAudioDeviceState()
     }
 
-    /** Returns current set of available/selectable audio devices.  */
-    fun getAudioDevices(): Set<AudioDevice> {
-        ThreadUtils.checkIsOnMainThread()
-        return Collections.unmodifiableSet(HashSet(audioDevices)) as Set<AudioDevice>
-    }
 
     /** Returns the currently selected audio device.  */
     fun getSelectedAudioDevice(): AudioDevice? {
@@ -276,6 +274,7 @@ class RTCAudioManager(context: Context) {
     }
 
     /** Helper method for receiver registration.  */
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private fun registerReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
         apprtcContext.registerReceiver(receiver, filter)
     }
@@ -317,22 +316,18 @@ class RTCAudioManager(context: Context) {
      */
     @Deprecated("")
     private fun hasWiredHeadset(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return audioManager.isWiredHeadsetOn
-        } else {
-            val devices = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
-            for (device: AudioDeviceInfo in devices) {
-                val type = device.type
-                if (type == AudioDeviceInfo.TYPE_WIRED_HEADSET) {
-                    Log.d(TAG, "hasWiredHeadset: found wired headset")
-                    return true
-                } else if (type == AudioDeviceInfo.TYPE_USB_DEVICE) {
-                    Log.d(TAG, "hasWiredHeadset: found USB audio device")
-                    return true
-                }
+        val devices = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
+        for (device: AudioDeviceInfo in devices) {
+            val type = device.type
+            if (type == AudioDeviceInfo.TYPE_WIRED_HEADSET) {
+                Log.d(TAG, "hasWiredHeadset: found wired headset")
+                return true
+            } else if (type == AudioDeviceInfo.TYPE_USB_DEVICE) {
+                Log.d(TAG, "hasWiredHeadset: found USB audio device")
+                return true
             }
-            return false
         }
+        return false
     }
 
     /**
@@ -367,7 +362,7 @@ class RTCAudioManager(context: Context) {
             }
         }
         // Store state which is set to true if the device list has changed.
-        var audioDeviceSetUpdated = audioDevices != newAudioDevices
+        val audioDeviceSetUpdated = audioDevices != newAudioDevices
         // Update the existing audio device set.
         audioDevices = newAudioDevices
         // Correct user selected audio devices if needed.

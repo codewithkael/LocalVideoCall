@@ -178,7 +178,7 @@ class RTCClient(
         localAudioTrack?.setEnabled(mute)
     }
 
-    fun toggleCamera(cameraPause: Boolean) {
+    fun toggleVideo(cameraPause: Boolean) {
         localVideoTrack?.setEnabled(cameraPause)
     }
 
