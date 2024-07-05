@@ -105,8 +105,7 @@ fun MainScreen(navController: NavController) {
             style = MaterialTheme.typography.titleLarge
         )
         Text(
-            text = "Simply connect to same router or use hotspot to connect two devices to each other," +
-                    "remember whoever is joining the hotspot should be the host, otherwise it doesn't work.",
+            text = "Simply connect to same router or use hotspot to connect two devices to each other",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 5.dp, start = 20.dp, end = 20.dp),
