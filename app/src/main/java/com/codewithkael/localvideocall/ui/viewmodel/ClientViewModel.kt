@@ -5,7 +5,7 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithkael.localvideocall.remote.socket.client.SocketClient
-import com.codewithkael.localvideocall.remote.socket.server.SocketClientListener
+import com.codewithkael.localvideocall.remote.socket.client.SocketClientListener
 import com.codewithkael.localvideocall.utils.MessageModel
 import com.codewithkael.localvideocall.utils.MessageModelType.ANSWER
 import com.codewithkael.localvideocall.utils.MessageModelType.ICE
@@ -106,7 +106,7 @@ class ClientViewModel @Inject constructor(
 
     fun prepareRemoteSurfaceView(view: SurfaceViewRenderer) {
         this.remoteView = view
-        rtcClient.initializeRemoteSurfaceView(view)
+        rtcClient.initializeSurfaceView(view)
     }
 
     override fun onCleared() {

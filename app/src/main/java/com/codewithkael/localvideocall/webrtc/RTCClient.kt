@@ -75,15 +75,7 @@ class RTCClient(
         return peerConnectionFactory.createPeerConnection(iceServer, observer)
     }
 
-    private fun initializeSurfaceView(surface: SurfaceViewRenderer) {
-        surface.run {
-            setEnableHardwareScaler(true)
-            setMirror(true)
-            init(eglContext.eglBaseContext, null)
-        }
-    }
-
-    fun initializeRemoteSurfaceView(surface: SurfaceViewRenderer) {
+    fun initializeSurfaceView(surface: SurfaceViewRenderer) {
         surface.run {
             setEnableHardwareScaler(true)
             setMirror(true)

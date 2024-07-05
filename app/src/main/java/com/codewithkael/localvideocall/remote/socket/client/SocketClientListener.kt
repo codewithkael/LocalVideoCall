@@ -1,4 +1,4 @@
-package com.codewithkael.localvideocall.remote.socket.server
+package com.codewithkael.localvideocall.remote.socket.client
 
 import com.codewithkael.localvideocall.utils.MessageModel
 

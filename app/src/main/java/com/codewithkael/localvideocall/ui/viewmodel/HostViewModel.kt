@@ -134,7 +134,7 @@ class HostViewModel @Inject constructor(
 
     fun prepareRemoteSurfaceView(view: SurfaceViewRenderer) {
         this.remoteView = view
-        rtcClient.initializeRemoteSurfaceView(view)
+        rtcClient.initializeSurfaceView(view)
     }
 
     override fun onCleared() {

@@ -1,6 +1,5 @@
 package com.codewithkael.localvideocall.remote.socket.client
 
-import com.codewithkael.localvideocall.remote.socket.server.SocketClientListener
 import com.codewithkael.localvideocall.utils.MessageModel
 import com.google.gson.Gson
 import org.java_websocket.client.WebSocketClient
