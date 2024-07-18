@@ -2,7 +2,7 @@
 
 Welcome to the GitHub repository for our comprehensive tutorial on creating a local video call application using Jetpack Compose and WebRTC. This course will guide you through building a modern local video call app from scratch, utilizing Jetpack Compose for the UI and WebRTC for real-time video communication. This application operates within a local network or using a hotspot, without requiring internet access or an external signaling server.
 
-**Watch the Tutorial here:** [www.youtube.com/@codewithkael](https://www.youtube.com/@codewithkael)
+**Watch the Tutorial here:** [www.youtube.com/@codewithkael](https://youtube.com/playlist?list=PLFelST8t9nqgkQsqbapT2JJeQJ8F4JU2g&si=yDxsuzwp-Lw3zA7S)
 
 ## What You Will Learn
 1. **Jetpack Compose Basics:** Learn the essentials of building UI components with Jetpack Compose.
